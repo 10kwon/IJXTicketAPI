@@ -190,8 +190,11 @@ def 한국철도공사_승차권_가져오기(depart: str, destination: str, q: 
                 
                 elif i == 8:
                 #인터넷 특가
+
                     price = ''.join([i for i in tds[i].text if i.isdigit()])
-                    price = price
+                    if price.endswith('5'):
+                        price = price[:-1]
+                        
                 elif i == 9:
                 #예약대기 여부
                     trs = tds[i].find_all('img')
@@ -223,6 +226,50 @@ def 한국철도공사_승차권_가져오기(depart: str, destination: str, q: 
         return jsonRtn
     
     else: 
-        jsonRtn['status'] = response.status_code
-        return jsonRtn
+        return 'error'
     
+@app.get("/a_tickets/{depart}/{destination}")
+def 공항철도_승차권_가져오기(depart: str, destination: str, q: Union[str, None] = None):
+    payload = {
+        'language': '',
+        'upMenuId': 'AR10',
+        'menuId': 'AR1010',
+        'medaDvsn': '01',
+        'discCode': '',
+        'discType': '',
+        'entpr': '',
+        'discSize': '',
+        'dptrStnCd': depart,
+        'arrvStnCd': destination,
+        'dptrDate': str(now.strftime("%Y-%m-%d")),
+        'dptrTime': str(now.strftime("%H%M")),
+        'psnAdult': '1',
+        'psnChild': '0'
+    }
+    response = requests.post('https://www.airportrailroad.com/rt/tktBstk.do', data=payload, headers=headers)
+    jsonRtn = []
+    
+    if response.status_code == 200:
+        html = response.text
+        soup = BeautifulSoup(html, 'lxml')
+        list = soup.find('ul', {'class': 'trainList'})
+        trs = list.find_all('li')
+        
+        for i in range(0, len(trs)):
+            trs = list.find_all('li')
+            tds = trs[i].find_all('div')
+            for i in range(0, len(tds)):
+                if i == 0:
+                #열차번호
+                    train = '공항철도'
+                    no = tds[i].text.strip()
+                elif i == 1:
+                    departTime = tds[i].text.strip()
+                elif i == 2:
+                    arriveTime = tds[i].text.strip()
+                    jsonRtn.append({'train': train, 'no': no, 'departTime': departTime, 'arriveTime': arriveTime})
+                else:
+                    pass
+        return jsonRtn
+    else:
+        return 'error'
