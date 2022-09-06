@@ -61,11 +61,11 @@ if response.status_code == 200:
     table = soup.find('table', {'class': 'tbl_h'})
 
     trs = table.find_all('tr', {'class': ['clrGrey', '']})
+
     for i in range(0, len(trs)):
-        print('['+str(i)+']')
+        trs = table.find_all('tr', {'class': ['clrGrey', '']})
         tds = trs[i].find_all('td')
         for i in range(0, len(tds)):
-            print('/'+str(i)+'/')
             if i == 0:
             # 직통/환승 여부
                 print(tds[i].text.strip())
@@ -81,10 +81,18 @@ if response.status_code == 200:
                     print('통근열차')
                 elif 'bg-04' in tds[i]['class']:
                     print('누리로')
+                elif 'bg-06' in tds[i]['class']:
+                    print('공항철도')
+                elif 'bg-07' in tds[i]['class']:
+                    print('KTX-산천 (호남)')
+                elif 'bg-08' in tds[i]['class']:
+                    print('KTX-경부')
                 elif 'bg-09' in tds[i]['class']:
                     print('ITX-청춘')
-                elif 'bg-08' in tds[i]['class']:
-                    print('ITX-새마을')
+                elif 'bg-10' in tds[i]['class']:
+                    print('KTX-이음')
+                elif 'bg-17' in tds[i]['class']:
+                    print('SRT')
                 else:
                     print('기타')
                 trno = ''.join([i for i in tds[i].text if i.isdigit()])
